@@ -93,7 +93,7 @@ module Slytherin
         table["loop"].times.reduce([]) do |values, i|
           values << column_info.map{|m| get_seed_data.call(m, i, default_seeder) }
         end
-          table["obj"].constantize.import(columns, values)
+          table["obj"].constantize.import(columns, values,  validate: false)
       end
     end
 

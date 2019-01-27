@@ -84,7 +84,7 @@ end
 seed.rbファイルに以下のように記述しrails db:seedを実行してください。
  
   ```
-Slytherin.get_mouse('./db/slytherin/mouse/seeder.yml')
+Slytherin.get_mouse('./db/slytherin/mouse/[任意の名前].yml')
  
   ```
  

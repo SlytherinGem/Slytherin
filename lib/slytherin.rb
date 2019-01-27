@@ -1,4 +1,8 @@
-require './db/slytherin/data_set'
+if Rails.env.test?
+  require './test/slytherin/data_set'
+else
+  require './db/slytherin/data_set'
+end
 
 module Slytherin
   

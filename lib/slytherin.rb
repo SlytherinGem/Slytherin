@@ -13,19 +13,17 @@ module Slytherin
   
       input_addtion_info = ->(col, col_info){
         return col if col_info.nil?
-        init_data = col_info["init_data"]    
-        if (init_data =~ /^[A-Z][a-z]*$/)
+
+        col["rotate"] = col_info["rotate"]
+        return col["init_data"] =  col_info["init_data"] if col_info["init_data"].kind_of?(Array)
+
+        if (col_info["init_data"] =~ /^[A-Z][a-z]*$/)
           col["references"] = col_info["references"]
           raise ReferencesError.new("外部キーを指定したseedを入れる時はreferencesをtrueにしてください") unless col["references"]
-        
           col["init_data"] = col_info["init_data"].constantize
         else
           col["init_data"] = send(col_info["init_data"])
         end
-  
-        col["rotate"] = col_info["rotate"]
-  
-        col
       }
   
       get_table_obj.call(base).each.reduce([]) do |table_info, obj|
@@ -38,7 +36,7 @@ module Slytherin
                               "init_data" => nil,
                               "rotate" => nil,
                               "references" => nil })
-  
+                              
             input_addtion_info.call(column_info.last, data["col_info"][col.name.to_s]) unless data["col_info"].nil?
   
             column_info
@@ -47,7 +45,7 @@ module Slytherin
           end
         end
         table_info.push({"obj" => obj, 
-                         "get_column_info" => { obj => column_info},
+                         "get_column_info" => { obj => column_info },
                          "loop" => data["loop"]})
       end
     end
@@ -55,6 +53,7 @@ module Slytherin
     def create_data(table_info)
       get_seed_data = ->(col, i, default_seeder){
     
+
         user_seed = ->(seed_data, rotate){ return rotate ? seed_data.rotate(i).first : seed_data.sample }
   
         default_seed = ->(type, default_seeder){
@@ -73,6 +72,7 @@ module Slytherin
         }
   
         seed_data = col["init_data"]
+      
         return user_seed.call(seed_data, col["rotate"]) unless seed_data.nil?
         return default_seed.call(col["type"], default_seeder)
       }
@@ -85,6 +85,7 @@ module Slytherin
   
       default_seeder = CreateInitialization.new
       table_info.each do |table|
+        puts "#{table["obj"]}のseedを実行します"
         column_info = table["get_column_info"][table["obj"]]
         columns = column_info.map{|m| m["name"].to_sym }
         convert_references_seed_data.call(column_info)

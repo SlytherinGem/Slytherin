@@ -80,6 +80,14 @@ def set_prefecture
 end
  ```
  
+### 実行
+seed.rbファイルに以下のように記述しrails db:seedを実行してください。
+ 
+  ```
+Slytherin.get_mouse('./db/slytherin/mouse/seeder.yml')
+ 
+  ```
+ 
 ## Installation
 Add this line to your application's Gemfile:
 

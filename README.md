@@ -19,7 +19,7 @@ db
 例えば、下記の例だと、
 Prefectureモデルを使って
 loopの回数は47回
-初期値には、開発者がdata_set.rbに記述したset_prefectureをnameカラムに対して使用する事になります。
+初期値には、開発者がset_data.rbに記述したset_prefectureをnameカラムに対して使用する事になります。
 また、nameカラム以外にカラムが存在する場合は、Slytherinが自動的に定義したデータが入る事になります。
 
  ```
@@ -61,7 +61,7 @@ Mouse:
         rotate: true
  ```
  
-### data_set.rbの記述方法
+### set_data.rbの記述方法
  配列を返却するメソッドを記述してください。
  以下の例だと都道府県を返却します。
  

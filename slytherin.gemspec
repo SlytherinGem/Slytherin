@@ -7,8 +7,8 @@ require "slytherin/version"
 Gem::Specification.new do |s|
   s.name        = "slytherin"
   s.version     = Slytherin::VERSION
-  s.authors     = [""]
-  s.email       = [""]
+  s.authors     = ["Kaashiwara"]
+  s.email       = ["hoge.fuga.kashiwara@gmail.com"]
   s.summary     = "This gem is convenient seeder"
   s.description = "please look description on github"
   s.license     = "MIT"

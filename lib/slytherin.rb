@@ -7,7 +7,7 @@ end
 module Slytherin
   class Seeder
     def gen_table_info(base)
-      get_table_obj = ->(base){ base.map{|m| m[0] }  }
+      get_table_obj = ->(base){ base.map{|m| m[0] }}
 
       block_column = ->(col_name){
         return true  if col_name == "id"
@@ -29,8 +29,10 @@ module Slytherin
         end
       }
 
-      get_table_obj.call(base).each.reduce([]) do |table_info, obj|
-        data = base[obj]
+      get_table_obj.call(base).each.reduce([]) do |table_info, key|
+        
+        data = base[key]
+        obj = key.sub(/.*_/, "")
         column_info =
         Module.const_get(obj).columns.reduce([]) do |column_info, col|
           unless block_column.call(col.name)
@@ -102,21 +104,14 @@ module Slytherin
     end
 
     def do_seed path
-      begin
+      begin 
         yml_data = open(path, 'r') { |f| YAML.load(f) }["Mouse"]
         table_info = gen_table_info(yml_data)
-        puts "--------------------------"
-        puts table_info
-        puts "--------------------------"
-        
         ActiveRecord::Base.transaction do
           create_data(table_info)
         end
       rescue => e
-        puts "[ ERROR :]"
-        puts "-" * 100
         puts e.message
-        puts "-" * 100
       end
     end
   end

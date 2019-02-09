@@ -88,7 +88,7 @@ module Slytherin
 
       default_seeder = CreateInitialization.new
       table_info.each do |table|
-        puts "#{table["obj"]}のseedを実行します"
+        puts "#{table["obj"]}のseedを実行します" unless Rails.env.test?
         column_info = table["get_column_info"][table["obj"]]
         columns = column_info.map{|m| m["name"].to_sym }
         convert_references_seed_data.call(column_info)

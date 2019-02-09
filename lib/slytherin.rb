@@ -105,6 +105,10 @@ module Slytherin
       begin
         yml_data = open(path, 'r') { |f| YAML.load(f) }["Mouse"]
         table_info = gen_table_info(yml_data)
+        puts "--------------------------"
+        puts table_info
+        puts "--------------------------"
+        
         ActiveRecord::Base.transaction do
           create_data(table_info)
         end

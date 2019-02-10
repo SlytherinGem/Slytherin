@@ -119,7 +119,7 @@ module Slytherin
 
       # 名前: get_seed_data
       # 動作： シード値の取得
-      #       ユーザがymlで定義したシード値かデフォルトのシード値かどちらかになる
+      #       ユーザがymlで定義したシード値かデフォルトのシード値か、どちらかを取得する
       get_seed_data = ->(col, i, default_seeder){
 
         user_seed = ->(seed_data, rotate){ return rotate ? seed_data.rotate(i).first : seed_data.sample }
@@ -167,7 +167,7 @@ module Slytherin
         columns = column_info.map{|m| m["name"].to_sym }
         # 外部キー指定されているシード値に入っているモデル名をIDのリストに変換
         convert_references_seed_data.call(column_info)
-        # BULKに必要な情報を形成
+        # BULK INSERTに必要な情報を形成
         values =
         table["loop"].times.reduce([]) do |values, i|
           values << column_info.map{|m| get_seed_data.call(m, i, default_seeder) }

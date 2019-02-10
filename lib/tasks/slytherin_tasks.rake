@@ -1,4 +1,4 @@
-# desc "Explaining what the task does"
-# task :slytherin do
-#   # Task goes here
-# end
+desc "Explaining what the task does"
+task :slytherin do
+    puts "test"
+end

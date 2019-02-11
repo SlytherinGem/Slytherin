@@ -115,17 +115,18 @@ module Slytherin
 
         check_column.call(addtion_info, column_info, key) unless addtion_info["col_info"].nil?
         table_info.push({"obj" => obj,
+                         "key" => key,
                          "get_column_info" => { obj => column_info },
                          "loop" => addtion_info["loop"]})
       end
     end
 
     def create_data(table_info)
-      get_seed_data = ->(col, i, default_seeder){
+      get_seed_data = ->(col, i, default_seeder, key){
 
         user_seed = ->(seed_data, col){ 
           pick_data = ->(seed_data, col){
-            return seed_data.sample if col["sample"]
+            return seed_data.sample if col["random"]
             return seed_data.first if col["first"]
             return seed_data.last if col["last"]
             return seed_data.rotate(i).first
@@ -135,7 +136,7 @@ module Slytherin
             if data.kind_of?(String)
               data + "_#{i}"
             else
-              UnexpectedTypeError.new("String型以外で、numberlingオプションは使用不可能です")
+              UnexpectedTypeError.new("#{key}: String型以外で、numberlingオプションは使用不可能です")
             end
           }
 
@@ -156,7 +157,7 @@ module Slytherin
           return default_seeder.time if type == "binary"
           return default_seeder.time if type == "boolean"
 
-          raise UnexpectedTypeError.new("予期しない型情報: #{type}カラム")
+          raise UnexpectedTypeError.new("#{key}: 予期しない型情報: #{type}カラム")
         }
 
         seed_data = col["init_data"]
@@ -176,9 +177,10 @@ module Slytherin
         column_info = table["get_column_info"][table["obj"]]
         columns = column_info.map{|m| m["name"].to_sym }
         convert_references_seed_data.call(column_info)
+        key = table["key"]
         values =
         table["loop"].times.reduce([]) do |values, i|
-          values << column_info.map{|m| get_seed_data.call(m, i, default_seeder) }
+          values << column_info.map{|m| get_seed_data.call(m, i, default_seeder, key) }
         end
           table["obj"].constantize.import(columns, values,  validate: false)
       end

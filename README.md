@@ -154,8 +154,9 @@ Mouse:
   Member:
     loop: 100
     col_info:
-      name:
+      prefecture_id:
         init_data: Prefecture
+        references: true
         random: true
  ```
 

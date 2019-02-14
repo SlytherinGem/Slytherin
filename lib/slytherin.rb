@@ -21,9 +21,11 @@ module Slytherin
     end
 
     def do_seed
+      exists_set_info = ->(){ @set_loop.present?}
       begin
         yml_data = open(@seed_path, 'r') { |f| YAML.load(f) }["Mouse"]
         table_info = gen_table_info(yml_data)
+        set_table_info(table_info) if exists_set_info.call()
         ActiveRecord::Base.transaction do
           create_data(table_info)
         end
@@ -32,7 +34,25 @@ module Slytherin
       end
     end
 
+    def set_loop key, set_loop
+      @set_loop = Hash.new if @set_loop.nil?
+      @set_loop[key] = set_loop
+    end
+
     private
+    def set_table_info table_info
+      set_loop = ->(){
+        @set_loop.each do |k, v|
+          result = table_info.select{|item| item["key"] ==  k}.first
+          raise SetError.new("指定されたキー: #{k} はymlに存在しません") if result.nil?
+          result["loop"] = v
+        end
+      }
+
+      set_loop.call() if @set_loop.present?
+      set_column_status.call() if @set_column_status.present?
+    end
+
     def gen_table_info(yml_data)
       require @function_path if @function_path.present?
 
@@ -68,7 +88,6 @@ module Slytherin
         input_init_data = ->(col, col_info){
           return col["init_data"] =  col_info["init_data"] if col_info["init_data"].kind_of?(Array)
           if (col_info["init_data"]  =~ /^[A-Z][A-Za-z0-9]*$/)
-            raise ReferencesError.new("#{key}: 外部キーを指定したseedを入れる時はreferencesをtrueにしてください") unless col["references"]
             col["init_data"] = col_info["init_data"].constantize
           else
             col["init_data"] = send(col_info["init_data"])
@@ -82,12 +101,19 @@ module Slytherin
         input_option.call(col, col_info, "first")
         input_option.call(col, col_info, "last")
         input_option.call(col, col_info, "numberling")
-        input_option.call(col, col_info, "references")
         check_option.call(col)
 
         input_init_data.call(col, col_info)
 
         col
+      }
+
+      get_loop_size = ->(loop_obj){
+        return loop_obj.constantize if (loop_obj  =~ /^[A-Z][A-Za-z0-9]*$/)
+        return send(loop_obj).length if (loop_obj  =~ /^[a-z][_a-z0-9]*$/)
+        return loop_obj.length if loop_obj.kind_of?(Array)
+
+        return loop_obj
       }
 
       get_key_list.call(yml_data).each.reduce([]) do |table_info, key|
@@ -103,8 +129,7 @@ module Slytherin
                       "random" => nil,
                       "first" => nil,
                       "last" => nil,
-                      "numberling" => nil,
-                      "references" => nil })
+                      "numberling" => nil})
 
             input_addtion_info.call(acc.last, addtion_info["col_info"][col.name.to_s], key) unless addtion_info["col_info"].nil?
             acc
@@ -112,12 +137,14 @@ module Slytherin
             acc
           end
         end
-
         check_column.call(addtion_info, column_info, key) unless addtion_info["col_info"].nil?
-        table_info.push({"obj" => obj,
-                         "key" => key,
-                         "get_column_info" => { obj => column_info },
-                         "loop" => addtion_info["loop"]})
+
+        table_info.push({
+          "obj" => obj,
+          "key" => key,
+          "get_column_info" => { obj => column_info },
+          "loop" => get_loop_size.call(addtion_info["loop"])
+        })
       end
     end
 
@@ -167,8 +194,12 @@ module Slytherin
 
       convert_references_seed_data =->(column_info){
         column_info.each do |e|
-          e["init_data"] = e["init_data"].all.pluck(:id) if e["references"]
+          e["init_data"] = e["init_data"].all.pluck(:id) unless e["init_data"].kind_of?(Array) || e["init_data"].nil?
         end
+      }
+      
+      convert_references_loop_data = ->(table){
+        table["loop"] = table["loop"].all.count unless table["loop"].kind_of?(Integer)
       }
 
       default_seeder = DefaultSeeder.new
@@ -177,6 +208,7 @@ module Slytherin
         column_info = table["get_column_info"][table["obj"]]
         columns = column_info.map{|m| m["name"].to_sym }
         convert_references_seed_data.call(column_info)
+        convert_references_loop_data.call(table)
         key = table["key"]
         values =
         table["loop"].times.reduce([]) do |values, i|
@@ -191,6 +223,7 @@ module Slytherin
   class ReferencesError < StandardError; end
   class NotExistsColumn < StandardError; end
   class TooManyOptions < StandardError; end
+  class SetError < StandardError; end
 
   class DefaultSeeder
     def string; SecureRandom.hex(8) end

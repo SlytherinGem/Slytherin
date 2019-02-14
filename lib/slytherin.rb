@@ -21,6 +21,7 @@ module Slytherin
     end
 
     def do_seed
+      puts_debug_message("🐍 start!")
       exists_set_info = ->(){ @set_loop.present?}
       begin
         yml_data = open(@seed_path, 'r') { |f| YAML.load(f) }["Mouse"]
@@ -40,6 +41,11 @@ module Slytherin
     end
 
     private
+
+    def puts_debug_message message
+      puts message if Rails.env.development?
+    end
+
     def set_table_info table_info
       set_loop = ->(){
         @set_loop.each do |k, v|
@@ -204,7 +210,7 @@ module Slytherin
 
       default_seeder = DefaultSeeder.new
       table_info.each do |table|
-        puts "#{table["obj"]}のseedを実行します" unless Rails.env.test?
+        puts_debug_message("#{table["obj"]}のseedを実行します")
         column_info = table["get_column_info"][table["obj"]]
         columns = column_info.map{|m| m["name"].to_sym }
         convert_references_seed_data.call(column_info)

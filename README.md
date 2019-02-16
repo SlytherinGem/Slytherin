@@ -156,12 +156,10 @@ Mouse:
     col_info:
       prefecture_id:
         init_data: Prefecture
-        references: true
         random: true
  ```
 
-referencesオプションをtrueにしてinit_dataにモデル名を記載すると <p>
-SlytherinはPrefectureモデルからIDを引っ張りだし自動的に投入してくれます。 <p>
+init_dataにモデル名を記載するとSlytherinはPrefectureモデルからIDを引っ張りだし自動的に投入してくれます。
         
 ---
 ### 同一モデルのSeedを複数回連続で入れたい。

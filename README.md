@@ -37,11 +37,10 @@ ymlファイルを定義できたら、seeds.rbに以下のように記述しま
 
   ```
 slytherin = Slytherin::Seeder.new()
-slytherin.set_path('./db/slytherin/mouse/seeder.yml')
-slytherin.do_seed()
+slytherin.do_seed('./db/slytherin/mouse/seeder.yml')
   ```
 
-以上で終わりです。<p>
+たった２行です。以上で終わりです。<p>
 rake db:seedコマンドを実行したらPrefectureのレコードが47件に増えている事がわかるでしょう。<p>
         
 ---
@@ -103,9 +102,8 @@ Mouse:
 
   ```
 slytherin = Slytherin::Seeder.new()
-slytherin.set_path('./db/slytherin/mouse/seeder.yml',
-                   './db/slytherin/set_data.rb')
-slytherin.do_seed()
+slytherin.set_function_path('./db/slytherin/set_data.rb')
+slytherin.do_seed('./db/slytherin/mouse/seeder.yml')
   ```
 
 データ定義ファイルをSlytherinの読み込みに追加しました。<p>

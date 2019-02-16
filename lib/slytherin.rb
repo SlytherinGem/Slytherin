@@ -251,7 +251,7 @@ module Slytherin
           return default_seeder.decimal if type == "decimal"
           return default_seeder.time if type == "time"
           return default_seeder.time if type == "binary"
-          return default_seeder.time if type == "boolean"
+          return default_seeder.boolean if type == "boolean"
 
           raise UnexpectedTypeError.new("#{key}: 予期しない型情報: #{type}カラム")
         }

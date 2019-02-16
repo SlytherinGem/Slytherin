@@ -18,7 +18,6 @@ module Slytherin
 =end
 
   class Seeder
-
     # メソッド名: set_function_path
     # 引数: function_path -> メソッドを定義したファイルのpath
     # 動作: メソッドを定義したファイルのpathをインスタンス変数に格納する
@@ -26,20 +25,20 @@ module Slytherin
       @function_path = function_path
     end
 
-    # メソッド名: set_loop
+    # メソッド名: update_loop
     # 引数: key -> ymlファイルのkey
     #       loop_size -> loopの回数
     # 動作: loop回数を設定する
-    def set_loop key, loop_size
-      @set_loop = Hash.new if @set_loop.nil?
-      @set_loop[key] = loop_size
+    def update_loop key, loop_size
+      @update_loop = Hash.new if @update_loop.nil?
+      @update_loop[key] = loop_size
     end
 
     # メソッド名: do_seed
     # 引数: yml_path -> ymlファイルのpath
-    # 動作: 作成されたymlファイルに基づいてseedを実行する
+    # 動作: ユーザに作成されたymlファイルに基づいてseedを実行する
     def do_seed yml_path
-      exists_reconfigure_info = ->(){ @set_loop.present?}
+      exists_reconfigure_info = ->(){ @update_loop.present?}
       begin
         # ymlファイルの中身を受け取り
         yml_data = open(yml_path, 'r') { |f| YAML.load(f) }["Mouse"]
@@ -69,8 +68,8 @@ module Slytherin
     # 引数: table_info -> テーブル情報
     # 動作: 受け取ったテーブル情報に対して要素を再度設定する
     def reconfigure_table_info table_info
-      set_loop = ->(){
-        @set_loop.each do |k, v|
+      update_loop = ->(){
+        @update_loop.each do |k, v|
           result = table_info.select{|item| item["key"] ==  k}.first
           raise SetError.new("指定されたキー: #{k} はymlに存在しません") if result.nil?
           result["loop"] = v
@@ -78,7 +77,7 @@ module Slytherin
       }
 
       # loop回数の再設定
-      set_loop.call() if @set_loop.present?
+      update_loop.call() if @update_loop.present?
     end
 
     # メソッド名: gen_table_info
@@ -97,7 +96,7 @@ module Slytherin
         return false
       }
 
-      # 開発者のカラムのタイポを検知するための補助関数
+      # ユーザのカラムのタイポを検知するための補助関数
       check_defined_column = ->(yml_data, column_info, key){
         # ymlに記載されたカラム名を取得
         defined_col_list = yml_data["col_info"].map{|m| m[0] }
@@ -225,7 +224,7 @@ module Slytherin
           end
         }
 
-        # 補助関数: 開発者が定義したinit_dataを取得する
+        # 補助関数: ユーザが定義したinit_dataを取得する
         defined_seed = ->(init_data, col){ 
 
           # 補助関数: 設定したオプションによりデータを選択

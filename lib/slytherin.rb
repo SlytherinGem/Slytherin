@@ -1,4 +1,3 @@
-
 require 'default_seeder.rb'
 include DefaultSeeder
 
@@ -131,13 +130,15 @@ module Slytherin
 
         # 初期値データの設定
         input_init_data_option = ->(col, defined_col_info){
+          # 初期値データは空
           return () if defined_col_info["init_data"].nil?
-          # Arrayが初期値に設定されている
-          return col["init_data"] =  defined_col_info["init_data"] if defined_col_info["init_data"].kind_of?(Array)
-          # Modelが初期値に設定されている
-          return col["init_data"] = defined_col_info["init_data"].constantize if (defined_col_info["init_data"]  =~ /^[A-Z][A-Za-z0-9]*$/)
-          # メソッドが初期値に設定されている
-          return col["init_data"] = send(defined_col_info["init_data"]) if (defined_col_info["init_data"] =~ /^[a-z][_a-z0-9]*$/)
+          # 配列が初期値に設定されている
+          if defined_col_info["init_data"].kind_of?(Array)
+            col["init_data"] = defined_col_info["init_data"].map{|m| eval(m)}
+            return ()
+          end
+          # Modelかメソッドが初期値に設定されている
+          col["init_data"] = eval(defined_col_info["init_data"])
         }
 
         # 定義されたカラムの情報が存在する場合オプションを入れ込む
@@ -156,15 +157,14 @@ module Slytherin
 
       # 補助関数: loopブロックで定義された情報を元にloopのサイズを取得する
       get_loop_size = ->(defined_loop){
-        # 配列でloopが定義されている
+        # 数値が定義されている
+        return defined_loop if defined_loop.kind_of?(Integer)
+        # 配列が定義されている
         return defined_loop.length if defined_loop.kind_of?(Array)
-        # Modelでloopが定義されている
+        # Modelが定義されている
         return defined_loop.constantize if (defined_loop  =~ /^[A-Z][A-Za-z0-9]*$/)
-        # メソッドでloopが定義されている
-        return send(defined_loop).length if (defined_loop =~ /^[a-z][_a-z0-9]*$/)
-
-        # 数値でloopが定義されている
-        return defined_loop
+        # メソッドが定義されている
+        return eval(defined_loop).length if (defined_loop =~ /^[a-z][_a-z0-9]*$/)
       }
 
       # ymlに記述したkey部分を主軸にまわして登録するための情報を一括で作成する

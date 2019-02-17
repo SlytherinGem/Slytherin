@@ -42,6 +42,7 @@ module Slytherin
       begin
         # ymlファイルの中身を受け取り
         yml_data = open(yml_path, 'r') { |f| YAML.load(f) }["Mouse"]
+
         # 登録する際のベースとなるテーブル情報の受け取り
         table_info = gen_table_info(yml_data)
         # ymlファイル以外で設定された情報があれば再設定する
@@ -131,12 +132,18 @@ module Slytherin
         input_init_data_option = ->(col, defined_col_info){
           # 初期値データは空
           return () if defined_col_info["init_data"].nil?
-          # 配列が初期値に設定されている
+
+          # 初期値データに配列が設定されている
           if defined_col_info["init_data"].kind_of?(Array)
-            col["init_data"] = defined_col_info["init_data"].map{|m| eval(m)}
+            col["init_data"] = defined_col_info["init_data"].map{|m| 
+              # {}で囲われていたらメソッドかモデルなので、evalを使用
+              m =~ /^\s*<.*>\s*$/ ? eval(m.delete("<>")) : m
+            }
+            puts col["init_data"]
             return ()
           end
-          # Modelかメソッドが初期値に設定されている
+
+          # 初期値データにModelかメソッドが設定されている
           col["init_data"] = eval(defined_col_info["init_data"])
         }
 
@@ -158,7 +165,7 @@ module Slytherin
       get_loop_size = ->(defined_loop){
         # 数値が定義されている
         return defined_loop if defined_loop.kind_of?(Integer)
-        # 配列が定義されている
+        # 配列が定義されている(lengthを取るだけなので中身の展開は不要)
         return defined_loop.length if defined_loop.kind_of?(Array)
         # Modelが定義されている
         return defined_loop.constantize if (defined_loop  =~ /^[A-Z][A-Za-z0-9]*$/)

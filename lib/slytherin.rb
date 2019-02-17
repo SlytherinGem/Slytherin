@@ -139,12 +139,17 @@ module Slytherin
               # {}で囲われていたらメソッドかモデルなので、evalを使用
               m =~ /^\s*<.*>\s*$/ ? eval(m.delete("<>")) : m
             }
-            puts col["init_data"]
             return ()
           end
 
           # 初期値データにModelかメソッドが設定されている
-          col["init_data"] = eval(defined_col_info["init_data"])
+          if defined_col_info["init_data"] =~ /^\s*<.*>\s*$/
+            col["init_data"] = eval(defined_col_info["init_data"].delete("<>"))
+            return ()
+          end
+
+          # 文字列やboolが設定されているので配列に変換
+          col["init_data"] = [defined_col_info["init_data"]]
         }
 
         # 定義されたカラムの情報が存在する場合オプションを入れ込む
@@ -167,10 +172,16 @@ module Slytherin
         return defined_loop if defined_loop.kind_of?(Integer)
         # 配列が定義されている(lengthを取るだけなので中身の展開は不要)
         return defined_loop.length if defined_loop.kind_of?(Array)
-        # Modelが定義されている
-        return defined_loop.constantize if (defined_loop  =~ /^[A-Z][A-Za-z0-9]*$/)
-        # メソッドが定義されている
-        return eval(defined_loop).length if (defined_loop =~ /^[a-z][_a-z0-9]*$/)
+        if (defined_loop =~ /^\s*<.*>\s*$/)
+          obj = defined_loop.delete("<>")
+          # Modelが定義されている
+          return obj.constantize if (obj  =~ /^[A-Z][A-Za-z0-9]*$/)
+          # メソッドが定義されている
+          return eval(obj).length if (obj =~ /^[a-z][_a-z0-9]*$/)
+        end
+
+        # 要素にヒットしなかったらloopのサイズは1とする
+        return 1
       }
 
       # ymlに記述したkey部分を主軸にまわして登録するための情報を一括で作成する

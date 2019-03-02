@@ -62,7 +62,7 @@ class Slytherin::Test < ActiveSupport::TestCase
   # テスト内容: numberlingオプションが正常に動作するか
   # 期待値: 3レコードの生成
   #         連番付きの都道府県が登録されていること
-  test "can create pref data by numberling" do
+  test "can create pref data with numberling option" do
     slytherin = Slytherin
     slytherin.do_seed './test/dummy/db/slytherin/prefecture/numberling.yml'
     # 3レコード生成済み
@@ -77,7 +77,7 @@ class Slytherin::Test < ActiveSupport::TestCase
   # テスト内容: firstオプションが正常に動作するか
   # 期待値: 3レコードの生成
   #         一番最初の都道府県のみが登録されていること
-  test "can create pref data by first" do
+  test "can create pref data with first option" do
     slytherin = Slytherin
     slytherin.do_seed './test/dummy/db/slytherin/prefecture/first.yml'
     # 3レコード生成済み
@@ -88,7 +88,7 @@ class Slytherin::Test < ActiveSupport::TestCase
   # テスト内容: lastオプションが正常に動作するか
   # 期待値: 3レコードの生成
   #         一番最後の都道府県のみが登録されていること
-  test "can create pref data by last" do
+  test "can create pref data with last option" do
     slytherin = Slytherin
     slytherin.do_seed './test/dummy/db/slytherin/prefecture/last.yml'
     # 3レコード生成済み
@@ -100,7 +100,7 @@ class Slytherin::Test < ActiveSupport::TestCase
   #            first + numberling
   # 期待値: 3レコードの生成
   #         一番最後の都道府県のみが登録されていること + 連番付き
-  test "can create pref data by first and numberling" do
+  test "can create pref data with first and numberling option" do
     slytherin = Slytherin
     slytherin.do_seed './test/dummy/db/slytherin/prefecture/first_numberling.yml'
     # 3レコード生成済み

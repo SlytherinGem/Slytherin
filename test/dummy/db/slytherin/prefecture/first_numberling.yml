@@ -1,0 +1,8 @@
+Mouse:
+  Pref:
+    loop: 3
+    col_info:
+      name:
+        init_data: ["北海道", "青森県", "岩手県"]
+        first: true
+        numberling: true

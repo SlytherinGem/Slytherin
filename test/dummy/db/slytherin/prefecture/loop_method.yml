@@ -1,0 +1,6 @@
+Mouse:
+  Pref:
+    loop: <set_prefecture>
+    col_info:
+      name:
+        init_data: <set_prefecture>

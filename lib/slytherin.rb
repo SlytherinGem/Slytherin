@@ -1,8 +1,5 @@
 require 'data_creater.rb'
-include DataCreater
 require 'parser.rb'
-include Parser
-
 module Slytherin
   class SetError < StandardError; end
   
@@ -57,14 +54,6 @@ module Slytherin
     end
 
     private
-    
-    # メソッド名: only_development_puts
-    # 引数: message -> デバッグメッセージ
-    # 動作: 開発環境でのみputsする
-    def only_development_puts message
-      puts message if Rails.env.development?
-    end
-
     # メソッド名: reconfigure_table_info
     # 引数: table_info -> テーブル情報
     # 動作: 受け取ったテーブル情報に対して要素を再度設定する
@@ -80,6 +69,5 @@ module Slytherin
       # loop回数の再設定
       update_loop.call() if @update_loop.present?
     end
-
   end
 end

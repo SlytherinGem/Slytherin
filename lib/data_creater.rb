@@ -1,22 +1,22 @@
 require 'seeder.rb'
-include DefinedSeeder
-include DefaultSeeder
+require 'slytherin_logger.rb'
 
-module DataCreater
+class DataCreater
   class UnexpectedTypeError < StandardError; end
-  def create table_info
-    table_info.each do |table|
-      only_development_puts("#{table["model"]}のseedを実行します")
-      # モデルの名前からカラム情報を取得
-      column_info = table["get_column_info"][table["model"]]
-      # 外部キー指定されている情報の変換
-      convert_references(table, column_info)
-      # カラムの名前を配列にする
-      col_name_arr = get_col_name_arr(column_info)
-      # ymlのkey取得（エラー発生時に場所を示すため）
-      key = table["key"]
-      # データを一括で登録
-      values =
+  class << self
+    def create table_info
+      table_info.each do |table|
+        SlytherinLogger.print("#{table["model"]}のseedを実行します")
+        # モデルの名前からカラム情報を取得
+        column_info = table["get_column_info"][table["model"]]
+        # 外部キー指定されている情報の変換
+        convert_references(table, column_info)
+        # カラムの名前を配列にする
+        col_name_arr = get_col_name_arr(column_info)
+        #  ymlのkey取得（エラー発生時に場所を示すため）
+        key = table["key"]
+        # データを一括で登録
+        values =
         table["loop"].times.reduce([]) do |values, i|
           # seed_dataを取得して登録情報を追加
           values << column_info.map{|m| get_seed_data(m, i, key) }
@@ -26,6 +26,8 @@ module DataCreater
       end
     end
 
+    private
+
     def get_col_name_arr column_info
       column_info.map{|m| m["name"].to_sym }
     end
@@ -34,9 +36,7 @@ module DataCreater
       convert_references_to_loop_data(table)
       convert_references_to_init_data(column_info)
     end
-
-    private
-
+  
     # メソッド名: get_seed_data
     # 引数: col => カラム情報 
     #       i => 連番（エラー処理用）
@@ -79,12 +79,5 @@ module DataCreater
     def convert_references_to_loop_data table_info
       table_info["loop"] = table_info["loop"].all.count unless table_info["loop"].kind_of?(Integer)
     end
-
-    # メソッド名: only_development_puts
-    # 引数: message -> デバッグメッセージ
-    # 動作: 開発環境でのみputsする
-    def only_development_puts message
-      puts message if Rails.env.development?
-    end
+  end
 end
-

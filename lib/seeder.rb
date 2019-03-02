@@ -1,4 +1,4 @@
-module DefaultSeeder
+class DefaultSeeder
   class UnexpectedTypeError < StandardError; end
   class << self
     def get type
@@ -29,7 +29,7 @@ module DefaultSeeder
   end
 end
 
-module DefinedSeeder
+class DefinedSeeder
   class << self
     def get init_data, col, i
       return init_data.sample if col["random"]

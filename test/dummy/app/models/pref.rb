@@ -1,0 +1,2 @@
+class Pref < ApplicationRecord
+end

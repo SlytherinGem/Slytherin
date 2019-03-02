@@ -15,9 +15,11 @@ class DataCreater
         col_name_arr = get_col_name_arr(column_info)
         #  ymlのkey取得（エラー発生時に場所を示すため）
         key = table["key"]
+        # loop_sizeを取得
+        loop_size = table["loop"] * table["mult"]
         # データを一括で登録
         values =
-        table["loop"].times.reduce([]) do |values, i|
+        loop_size.times.reduce([]) do |values, i|
           # seed_dataを取得して登録情報を追加
           values << column_info.map{|m| get_seed_data(m, i, key) }
         end

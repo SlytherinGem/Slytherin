@@ -19,7 +19,8 @@ class Parser
           "model" => model,
           "key" => key,
           "get_column_info" => { model => column_info },
-          "loop" => get_loop_size(defined_data["loop"])
+          "loop" => get_loop_size(defined_data["loop"]),
+          "mult" => defined_data["mult"].nil? ? 1 : defined_data["mult"].to_i,
         })
       end
     end

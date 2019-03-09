@@ -6,17 +6,16 @@ class DataCreater
   class << self
     def create table_info
       table_info.each do |table|
-        SlytherinLogger.print("#{table["model"]}のseedを実行します")
+        # log情報が存在すれば出力
+        SlytherinLogger.print(table["log"]) unless table["log"].nil?
         # モデルの名前からカラム情報を取得
         column_info = table["get_column_info"][table["model"]]
-        # 外部キー指定されている情報の変換
-        convert_references(table, column_info)
         # カラムの名前を配列にする
         col_name_arr = get_col_name_arr(column_info)
         #  ymlのkey取得（エラー発生時に場所を示すため）
         key = table["key"]
         # loop_sizeを取得
-        loop_size = table["loop"] * table["mult"]
+        loop_size = get_loop_size(table["loop"])
         # データを一括で登録
         values =
         loop_size.times.reduce([]) do |values, i|
@@ -30,15 +29,31 @@ class DataCreater
 
     private
 
+    def get_loop_size defined_loop    
+      if defined_loop.kind_of?(Integer)
+        defined_loop
+      elsif defined_loop.kind_of?(Array)
+        defined_loop.length
+      elsif defined_loop =~ /^\s*<.*>\s*$/
+        result = replace_loop_expression(defined_loop.delete("<>"))
+        get_loop_size(result)
+      else
+        1
+      end
+    end
+
+    def replace_loop_expression expression
+      if (expression =~ /^:[A-Z][A-Za-z0-9]*$/)
+        eval(expression.delete(":")).all.count
+      else
+        eval(expression)
+      end
+    end
+  
     def get_col_name_arr column_info
       column_info.map{|m| m["name"].to_sym }
     end
       
-    def convert_references table, column_info
-      convert_references_to_loop_data(table)
-      convert_references_to_init_data(column_info)
-    end
-  
     # メソッド名: get_seed_data
     # 引数: col => カラム情報 
     #       i => 連番（エラー処理用）
@@ -46,11 +61,13 @@ class DataCreater
     # 動作: オプションなどを適用してｍseed_dataを作成する。定義されていなかった場合は、DefaultSeederから取得
     #       定義されている場合はDefinedSeederから取得
     def get_seed_data col, i, key
-      # seed_dataの取得
-      seed_data = col["init_data"].nil? ? DefaultSeeder.get(col["type"]) : DefinedSeeder.get(col["init_data"], col, i)
-      # 連番付与オプションが入ってい場合、連番を付与したinit_dataを返却
-      seed_data = add_numberling(seed_data, i, key) if col["numberling"]
-      return seed_data 
+      seed_data = col["init_data"].nil? ? DefaultSeeder.get(col["type"]) : DefinedSeeder.get(col, i)
+      # 連番付与オプションが入ってい場合、連番を付与したseed_dataを返却
+      if col["numberling"]
+        add_numberling(seed_data, i, key)
+      else
+        seed_data
+      end
     end
 
     # メソッド名: add_numberling
@@ -64,22 +81,6 @@ class DataCreater
       else
         UnexpectedTypeError.new("#{key}: String型以外で、numberlingオプションは使用不可能です")
       end
-    end
-
-    # メソッド名: convert_references_to_init_data
-    # 引数: column_info
-    # 動作: init_dataにモデルが入っているのを、そのモデルのIDの配列に変換する
-    def convert_references_to_init_data column_info
-      column_info.each do |e|
-        e["init_data"] = e["init_data"].all.pluck(:id) unless e["init_data"].kind_of?(Array) || e["init_data"].nil?
-      end
-    end
-
-    # メソッド名: convert_references_to_loop_data
-    # 引数: table_info
-    # 動作: loopにモデルが入っているのを、そのモデルの配列のlengthに変換する
-    def convert_references_to_loop_data table_info
-      table_info["loop"] = table_info["loop"].all.count unless table_info["loop"].kind_of?(Integer)
     end
   end
 end

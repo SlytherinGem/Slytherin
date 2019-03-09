@@ -31,11 +31,29 @@ end
 
 class DefinedSeeder
   class << self
-    def get init_data, col, i
+    def get col, i
+      init_data =
+      if col["init_data"].kind_of?(Array)
+        col["init_data"].map{|m| m =~ /^\s*<.*>\s*$/ ? eval(m.delete("<>")) : m }
+      elsif col["init_data"] =~ /^\s*<.*>\s*$/
+       replace_expression(col["init_data"].delete("<>"))
+      else
+        [col["init_data"]] 
+      end
+
       return init_data.sample if col["random"]
       return init_data.first if col["first"]
       return init_data.last if col["last"]
       return init_data.rotate(i).first
     end
+
+    def replace_expression init_data
+      if (init_data =~ /^:[A-Z][A-Za-z0-9]*$/)
+        eval(init_data.delete(":")).all.pluck(:id)
+      else
+        eval(init_data)
+      end
+    end
+
   end
 end

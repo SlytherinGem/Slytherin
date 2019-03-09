@@ -19,8 +19,8 @@ class Parser
           "model" => model,
           "key" => key,
           "get_column_info" => { model => column_info },
-          "loop" => get_loop_size(defined_data["loop"]),
-          "mult" => defined_data["mult"].nil? ? 1 : defined_data["mult"].to_i,
+          "loop" => defined_data["loop"],
+          "log" => defined_data["log"]
         })
       end
     end
@@ -50,19 +50,6 @@ class Parser
       open(yml_path, 'r') { |f| YAML.load(f) }["Mouse"]
     end
 
-    def get_loop_size defined_loop
-      return defined_loop if defined_loop.kind_of?(Integer)
-      return defined_loop.length if defined_loop.kind_of?(Array)
-      if (defined_loop =~ /^\s*<.*>\s*$/)
-        obj = defined_loop.delete("<>")
-        return obj.constantize if (obj  =~ /^[A-Z][A-Za-z0-9]*$/)
-        return eval(obj).length if (obj =~ /^[a-z][_a-z0-9]*$/)
-      end
-
-      # 要素にヒットしなかったらloopのサイズは1とする
-      return 1
-    end
-
     def get_key_list yml_data; yml_data.map{|m| m[0] } end
 
     def remove_key_prefix key; key.sub(/.*_/, "") end
@@ -71,7 +58,6 @@ class Parser
       return true  if col_name == "id"
       return false
     end
-
 
     def check_defined_column yml_data, column_info, key
       # ymlに記載されたカラム名を取得
@@ -95,7 +81,7 @@ class OptionSetter
       set_option(data, defined_col_info, "first")
       set_option(data, defined_col_info, "last")
       set_option(data, defined_col_info, "numberling")
-      set_init_data_option(data, defined_col_info)
+      set_option(data, defined_col_info, "init_data")
       # 不適切なオプションの指定の仕方をしていないか検証
       check_option(data)
 
@@ -106,28 +92,6 @@ class OptionSetter
     def set_option data, defined_col_info, option
       return () if defined_col_info[option].nil?
       data[option] = defined_col_info[option]
-    end
-
-    def set_init_data_option data, defined_col_info
-      return () if defined_col_info["init_data"].nil?
-  
-      # 初期値データに配列が設定されている
-      if defined_col_info["init_data"].kind_of?(Array)
-        data["init_data"] = defined_col_info["init_data"].map{|m| 
-          # {}で囲われていたらメソッドかモデルなので、evalを使用
-          m =~ /^\s*<.*>\s*$/ ? eval(m.delete("<>")) : m
-        }
-        return ()
-      end
- 
-      # 初期値データにModelかメソッドが設定されている
-      if defined_col_info["init_data"] =~ /^\s*<.*>\s*$/
-        data["init_data"] = eval(defined_col_info["init_data"].delete("<>"))
-        return ()
-      end
- 
-      # 文字列やboolが設定されているので配列に変換
-      data["init_data"] = [defined_col_info["init_data"]] 
     end
 
     def check_option data

@@ -59,8 +59,6 @@ module Slytherin
     end
 
     private
-
-
     # メソッド名: reconfigure_table_info
     # 引数: table_info -> テーブル情報
     # 動作: 受け取ったテーブル情報に対して要素を再度設定する

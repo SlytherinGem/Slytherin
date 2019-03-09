@@ -1,0 +1,11 @@
+Mouse:
+  Pref:
+    loop: <set_prefecture>
+    col_info:
+      name:
+        init_data: <set_prefecture>
+  Member:
+    loop: <:Pref>
+    col_info:
+      pref_id: 
+        init_data: <:Pref>

@@ -107,7 +107,7 @@ class Slytherin::Test < ActiveSupport::TestCase
   # テスト内容: Obj.all.pluck(:id)短縮オプションの適用
   # 期待値: 47レコードのMemberが登録されており、外部キーで参照しているpref_idがPrefのものと全て一致
   test "can create member with references key which pref has" do
-    # 都道府県レコード生成
+    # 都道府県レコード作成
     Slytherin.set_function_path './test/dummy/db/slytherin/data_set.rb'
     Slytherin.do_seed './test/dummy/db/slytherin/prefecture/loop_method.yml'
     # 都道府県の数だけ学生のレコード作成

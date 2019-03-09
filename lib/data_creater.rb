@@ -1,4 +1,4 @@
-require 'seeder.rb'
+require 'default_seeder.rb'
 require 'slytherin_logger.rb'
 
 class DataCreater
@@ -10,17 +10,17 @@ class DataCreater
         SlytherinLogger.print(table["log"]) unless table["log"].nil?
         # モデルの名前からカラム情報を取得
         column_info = table["get_column_info"][table["model"]]
+        # init_dataを配列に変換して更新
+        update_init_data(column_info)
         # カラムの名前を配列にする
-        col_name_arr = get_col_name_arr(column_info)
+        col_name_arr = column_info.map{|m| m["name"].to_sym }
         #  ymlのkey取得（エラー発生時に場所を示すため）
         key = table["key"]
-        # loop_sizeを取得
-        loop_size = get_loop_size(table["loop"])
         # データを一括で登録
         values =
-        loop_size.times.reduce([]) do |values, i|
-          # seed_dataを取得して登録情報を追加
-          values << column_info.map{|m| get_seed_data(m, i, key) }
+        get_loop_size(table["loop"]).times.reduce([]) do |values, i|
+          # init_dataを取得して登録情報を追加
+          values << column_info.map{|m| InitData.make(m, i, key) }
         end
         # 一括登録
         table["model"].constantize.import(col_name_arr, values,  validate: false)
@@ -28,6 +28,27 @@ class DataCreater
     end
 
     private
+
+    def update_init_data column_info
+      column_info.each do |e|
+        e["init_data"] =
+        if e["init_data"].kind_of?(Array)
+          e["init_data"].map{|m| m =~ /^\s*<.*>\s*$/ ? eval(m.delete("<>")) : m }
+        elsif e["init_data"] =~ /^\s*<.*>\s*$/
+         replace_init_data_expression(e["init_data"].delete("<>"))
+        else
+          [e["init_data"]] 
+        end
+      end
+    end
+
+    def replace_init_data_expression init_data
+      if (init_data =~ /^:[A-Z][A-Za-z0-9]*$/)
+        eval(init_data.delete(":")).all.pluck(:id)
+      else
+        eval(init_data)
+      end
+    end
 
     def get_loop_size defined_loop    
       if defined_loop.kind_of?(Integer)
@@ -49,32 +70,39 @@ class DataCreater
         eval(expression)
       end
     end
-  
-    def get_col_name_arr column_info
-      column_info.map{|m| m["name"].to_sym }
-    end
-      
-    # メソッド名: get_seed_data
-    # 引数: col => カラム情報 
-    #       i => 連番（エラー処理用）
-    #       key => ymlのkey(エラー処理用)
-    # 動作: オプションなどを適用してｍseed_dataを作成する。定義されていなかった場合は、DefaultSeederから取得
-    #       定義されている場合はDefinedSeederから取得
-    def get_seed_data col, i, key
-      seed_data = col["init_data"].nil? ? DefaultSeeder.get(col["type"]) : DefinedSeeder.get(col, i)
-      # 連番付与オプションが入ってい場合、連番を付与したseed_dataを返却
-      if col["numberling"]
-        add_numberling(seed_data, i, key)
+
+  end
+end
+
+class InitData
+  class << self
+    def make col, i, key
+      data =
+      if col["init_data"].nil?
+        DefaultSeeder.get(col["type"])
       else
-        seed_data
+        apply_arr_option(col, i)
+      end
+
+      apply_contents_option(col, i, data, key)
+    end
+
+    def apply_arr_option col, i
+      return col["init_data"].sample if col["random"]
+      return col["init_data"].first if col["first"]
+      return col["init_data"].last if col["last"]
+
+      col["init_data"].rotate(i).first
+    end
+
+    def apply_contents_option col, i, data, key
+      if col["numberling"]
+        add_numberling(data, i, key)
+      else
+        data
       end
     end
 
-    # メソッド名: add_numberling
-    # 引数: seed_data => 取得したseedデータ
-    #       i         => 連番(エラー処理用)
-    #       key       => ymlのkey(エラー処理用)
-    # 動作: numberlingオプションが付与されていた場合に数値をつける
     def add_numberling seed_data, i, key
       if seed_data.kind_of?(String)
         seed_data += "_#{i}"
@@ -82,5 +110,6 @@ class DataCreater
         UnexpectedTypeError.new("#{key}: String型以外で、numberlingオプションは使用不可能です")
       end
     end
+
   end
 end

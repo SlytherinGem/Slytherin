@@ -1,0 +1,7 @@
+Mouse:
+  Pref:
+    disabled: 0 - 3
+    loop: 5
+    col_info:
+      name:
+        init_data: ["北海道", "青森県", "岩手県", "宮城県", "秋田県"]

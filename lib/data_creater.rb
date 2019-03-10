@@ -1,10 +1,13 @@
 require 'default_seeder.rb'
 require 'slytherin_logger.rb'
+require 'save_data.rb'
 
 class DataCreater
   class UnexpectedTypeError < StandardError; end
   class << self
     def create table_info
+      # saveの初期化
+      SaveData.init
       table_info.each do |table|
         # log情報が存在すれば出力
         SlytherinLogger.print(table["log"]) unless table["log"].nil?
@@ -14,13 +17,11 @@ class DataCreater
         model = table["model"].constantize
         # init_dataを配列に変換して更新
         update_init_data(column_info)
-        # カラムの名前を配列にする
-        col_name_arr = column_info.map{|m| m["name"].to_sym }
-        #  ymlのkey取得（エラー発生時に場所を示すため）
+        # ymlのkey取得（エラー発生時に場所を示すため）
         key = table["key"]
         latest_record = model.last
+        # 最新のIDを取得
         acc_id = latest_id = latest_record.nil? ? 0 : latest_record.id
-        # データを一括で登録
         values =
         get_loop_size(table["loop"]).times.reduce([]) do |values, i|
           # init_dataを抽出し登録情報を追加
@@ -28,22 +29,29 @@ class DataCreater
             m["name"] == "id" ? acc_id += 1 : InitData.make(m, i, key) 
           }
         end
-        # disabledの設定
+        # disabledが設定されているレコードは削除
         values.slice!(table["disabled"][0], table["disabled"][1]) if table["disabled"].present?
-        # 一括登録
-        model.import(col_name_arr, values,  validate: false)
+        # 一括で登録
+        model.import(column_info.map{|m| m["name"].to_sym }, values, validate: false)
+        # saveの指定があれば保存
+        if table["save"].present? 
+          SaveData.save(table["save"], column_info, model, latest_id, acc_id)
+        end
       end
     end
 
     private
 
     def update_init_data column_info
+      # 変数saveはymlの定義ファイルで使用されるので
+      # SaveDataから取得しておく
+      save = SaveData.get
       column_info.each do |e|
         e["init_data"] =
         if e["init_data"].kind_of?(Array)
           e["init_data"].map{|m| m =~ /^\s*<.*>\s*$/ ? eval(m.delete("<>")) : m }
         elsif e["init_data"] =~ /^\s*<.*>\s*$/
-         replace_init_data_expression(e["init_data"].delete("<>"))
+          replace_init_data_expression(e["init_data"].delete("<>"))
         elsif e["init_data"].nil?
           nil
         else
@@ -53,6 +61,9 @@ class DataCreater
     end
 
     def replace_init_data_expression init_data
+      # 変数saveはymlの定義ファイルで使用されるので
+      # SaveDataから取得しておく
+      save = SaveData.get
       if (init_data =~ /^:[A-Z][A-Za-z0-9]*$/)
         eval(init_data.delete(":")).all.pluck(:id)
       else
@@ -60,7 +71,7 @@ class DataCreater
       end
     end
 
-    def get_loop_size defined_loop    
+    def get_loop_size defined_loop
       if defined_loop.kind_of?(Integer)
         defined_loop
       elsif defined_loop.kind_of?(Array)
@@ -74,6 +85,9 @@ class DataCreater
     end
 
     def replace_loop_expression expression
+      # 変数saveはymlの定義ファイルで使用されるので
+      # SaveDataから取得しておく
+      save = SaveData.get 
       if (expression =~ /^:[A-Z][A-Za-z0-9]*$/)
         eval(expression.delete(":")).all.count
       else

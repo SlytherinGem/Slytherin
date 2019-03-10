@@ -21,7 +21,8 @@ class Parser
           "get_column_info" => { model => column_info },
           "loop" => defined_data["loop"],
           "log" => defined_data["log"],
-          "disabled" => get_disabled(defined_data["disabled"])
+          "disabled" => get_disabled(defined_data["disabled"]),
+          "save" => defined_data["save"]
         })
       end
     end

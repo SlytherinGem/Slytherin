@@ -7,6 +7,8 @@ class Slytherin::Test < ActiveSupport::TestCase
     Slytherin.do_seed './test/dummy/db/slytherin/prefecture/simple.yml'
     # 47レコード登録済み
     assert_equal(47, Pref.all.count)
+    # 名前にはランダムな文字列が設定されている
+    assert_equal(true,  Pref.pluck(:name).all?{ |name| name.present? })
   end
 
   # テスト内容: 都道府県配列が記述されたymlファイルが正常に使用できるか
@@ -119,4 +121,31 @@ class Slytherin::Test < ActiveSupport::TestCase
                  Pref.all.pluck(:id).sort)
 
   end
+
+  # テスト内容: disabledオプションの実装に関して
+  # 期待値: Prefレコードの0から2番目が登録されずに計2のレコードが登録される事
+  test "can create pref data with disabled option" do
+    Slytherin.do_seed './test/dummy/db/slytherin/prefecture/disabled.yml'
+    # 全体数は2
+    assert_equal(Pref.all.count, 2)
+    # 指定した都道府県が作成されていないか検証
+    disabled_name =  ["北海道", "青森県", "岩手県"]
+    disabled_name.each do |name|
+      assert_equal(true, Pref.find_by(name: name).nil?)
+    end
+  end
+
+  # テスト内容: saveオプションの実装に関して
+  # 期待値: PrefレコードのnameとMemberレコードのnameが完全一致
+  test "can create pref and member data with save option" do
+    # 都道府県の名前をsaveしてMemberのレコードを作成
+    Slytherin.do_seed './test/dummy/db/slytherin/composite/save.yml'
+    # 個数は同じ
+    assert_equal(Pref.all.count, 3)
+    assert_equal(Member.all.count, 3)
+    # 名前が全部一致
+    assert_equal(Member.all.pluck(:name).sort,
+                 Pref.all.pluck(:name).sort)
+  end
+
 end

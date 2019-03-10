@@ -1,0 +1,14 @@
+Mouse:
+  Pref:
+    loop: 3
+    col_info:
+      name:
+        init_data: ["北海道", "青森県", "岩手県"]
+    save: pref_data
+  Member:
+    loop: < save["pref_data"]["name"] >
+    col_info:
+      name:
+        init_data: < save["pref_data"]["name"] >
+      pref_id: 
+        init_data: <:Pref>

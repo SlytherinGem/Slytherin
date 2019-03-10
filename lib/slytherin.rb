@@ -39,22 +39,18 @@ module Slytherin
     # 引数: yml_path -> ymlファイルのpath
     # 動作: ユーザに作成されたymlファイルに基づいてseedを実行する
     def do_seed yml_path
-      begin
-        # 処理しやすいようにymlを独自のデータ構造にParseする
-        table_info = 
-        if defined? @function_path
-          Parser.parse(yml_path, @function_path)
-        else
-          Parser.parse(yml_path, nil)
-        end
-        # yml以外で設定された情報があれば再設定する
-        reconfigure_table_info(table_info) if defined? @update_loop
-        # データを作成
-        ActiveRecord::Base.transaction do
-          DataCreater.create(table_info)
-        end
-      rescue => e
-        puts e.message
+      # 処理しやすいようにymlを独自のデータ構造にParseする
+      table_info = 
+      if defined? @function_path
+        Parser.parse(yml_path, @function_path)
+      else
+        Parser.parse(yml_path, nil)
+      end
+      # yml以外で設定された情報があれば再設定する
+      reconfigure_table_info(table_info) if defined? @update_loop
+      # データを作成
+      ActiveRecord::Base.transaction do
+        DataCreater.create(table_info)
       end
     end
 

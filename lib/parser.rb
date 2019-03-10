@@ -20,7 +20,8 @@ class Parser
           "key" => key,
           "get_column_info" => { model => column_info },
           "loop" => defined_data["loop"],
-          "log" => defined_data["log"]
+          "log" => defined_data["log"],
+          "disabled" => get_disabled(defined_data["disabled"])
         })
       end
     end
@@ -28,22 +29,22 @@ class Parser
     private
     def get_column_info model, defined_data, key
       Module.const_get(model).columns.reduce([]) do |acc, col|
-        unless block_column(col.name)
-          acc.push({"name" => col.name.to_s,
-                    "type" => col.type.to_s,
-                    "init_data" => nil,
-                    "rotate" => nil,
-                    "random" => nil,
-                    "first" => nil,
-                    "last" => nil,
-                    "numberling" => nil})
-          # 定義されているデータの中にoptionがあれば設定する
-          OptionSetter.set(acc.last, defined_data["col_info"][col.name.to_s], key) unless defined_data["col_info"].nil?
-          acc
-        else
-          acc
-        end
+        acc.push({"name" => col.name.to_s,
+                  "type" => col.type.to_s,
+                  "init_data" => nil,
+                  "rotate" => nil,
+                  "random" => nil,
+                  "first" => nil,
+                  "last" => nil,
+                  "numberling" => nil})
+        # 定義されているデータの中にoptionがあれば設定する
+        OptionSetter.set(acc.last, defined_data["col_info"][col.name.to_s], key) unless defined_data["col_info"].nil?
+        acc
       end
+    end
+
+    def get_disabled disabled
+      disabled.gsub(" ", "").split("-").map{ |m| m.to_i } if disabled.present?
     end
 
     def get_yml_data yml_path
@@ -53,11 +54,6 @@ class Parser
     def get_key_list yml_data; yml_data.map{|m| m[0] } end
 
     def remove_key_prefix key; key.sub(/.*_/, "") end
-
-    def block_column col_name
-      return true  if col_name == "id"
-      return false
-    end
 
     def check_defined_column yml_data, column_info, key
       # ymlに記載されたカラム名を取得
@@ -84,13 +80,12 @@ class OptionSetter
       set_option(data, defined_col_info, "init_data")
       # 不適切なオプションの指定の仕方をしていないか検証
       check_option(data)
-
       data
     end
 
     private
     def set_option data, defined_col_info, option
-      return () if defined_col_info[option].nil?
+      return if defined_col_info[option].nil?
       data[option] = defined_col_info[option]
     end
 

@@ -30,7 +30,8 @@ class DataCreater
           }
         end
         # disabledが設定されているレコードは削除
-        values.slice!(table["disabled"][0], table["disabled"][1]) if table["disabled"].present?
+        # ymlファイルではsliceを0始まりではなく1始まりで設定するので、その分の-1
+        values.slice!(table["disabled"][0] - 1, table["disabled"][1]) if table["disabled"].present?
         # 一括で登録
         model.import(column_info.map{|m| m["name"].to_sym }, values, validate: false)
         # saveの指定があれば保存

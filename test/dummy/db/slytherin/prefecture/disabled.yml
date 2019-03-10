@@ -1,6 +1,6 @@
 Mouse:
   Pref:
-    disabled: 0 - 3
+    disabled: 1 - 3
     loop: 5
     col_info:
       name:

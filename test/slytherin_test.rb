@@ -123,7 +123,7 @@ class Slytherin::Test < ActiveSupport::TestCase
   end
 
   # テスト内容: disabledオプションの実装に関して
-  # 期待値: Prefレコードの0から2番目が登録されずに計2のレコードが登録される事
+  # 期待値: Prefレコードの1から3番目が登録されずに計2のレコードが登録される事
   test "can create pref data with disabled option" do
     Slytherin.do_seed './test/dummy/db/slytherin/prefecture/disabled.yml'
     # 全体数は2

@@ -5,8 +5,15 @@ class Parser
     # 引数: yml_data -> ymlから抽出したhash
     # 動作: 登録するtableの情報に関してloopの回数やオプションも含めて作成する
     def parse(yml_path, function_path = nil)
-      require function_path if function_path.present?
       yml_data = get_yml_data(yml_path)
+
+      set_function_path = ->(){
+        # set_function_pathによるパスの設定
+        require function_path if function_path.present?
+        # yml記載によるパスの設定
+        require yml_data["$function"] if yml_data["$function"].present?
+      }.call()
+          
       # ymlに記述したkey部分を主軸にまわして登録するための情報を一括で作成する
       get_key_list(yml_data).reduce([]) do |parse_data, key|
         # ymlに定義された情報を取得
@@ -52,7 +59,11 @@ class Parser
       open(yml_path, 'r') { |f| YAML.load(f) }["Mouse"]
     end
 
-    def get_key_list yml_data; yml_data.map{|m| m[0] } end
+    def get_key_list yml_data
+      # $で設定している部分を消去
+      yml_data.delete_if {|key, value| key =~ /\$.*/ }
+      yml_data.map{|m| m[0] } 
+    end
 
     def remove_key_prefix key; key.sub(/.*_/, "") end
 

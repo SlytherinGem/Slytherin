@@ -1,0 +1,11 @@
+Mouse:
+  1_Member:
+    loop: 100
+    col_info:
+      pref_id: 
+        init_data: <:Pref>
+  2_Member:
+    loop: 100
+    col_info:
+      pref_id:
+        init_data: <:Pref>

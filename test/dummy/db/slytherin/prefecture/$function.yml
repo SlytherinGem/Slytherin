@@ -1,0 +1,7 @@
+Mouse:
+  $function: ./test/dummy/db/slytherin/data_set.rb
+  Pref:
+    loop: 47
+    col_info:
+      name:
+        init_data: <set_prefecture>

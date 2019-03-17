@@ -148,4 +148,29 @@ class Slytherin::Test < ActiveSupport::TestCase
                  Pref.all.pluck(:name).sort)
   end
 
+  # テスト内容: 同一モデル複数登録の実装に関して
+  # 期待値: Memberレコードが200件登録されていること
+  test "can create member with multiple obj" do
+    # Member × 2 を生成
+    Slytherin.set_function_path './test/dummy/db/slytherin/data_set.rb'
+    Slytherin.do_seed './test/dummy/db/slytherin/prefecture/loop_method.yml'
+    Slytherin.do_seed './test/dummy/db/slytherin/member/multiple_model.yml'
+    # 200件生成
+    assert_equal(Member.all.count, 200)
+  end
+
+  # テスト内容: $functionの実装に関して
+  # 期待値: 47都道府県の登録
+ test "can careate pref with $function option" do
+  # 都道府県を作成
+  Slytherin.do_seed './test/dummy/db/slytherin/prefecture/$function.yml'
+    # 47レコード生成済み
+    assert_equal(47, Pref.all.count)
+    # 内容が登録されているか確認
+    registerd = set_prefecture
+    registerd.each do |e|
+      assert_equal(true, Pref.find_by(name: e).present?)
+    end
+ end
+ 
 end

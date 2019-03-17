@@ -9,7 +9,7 @@ class SaveData
       @save[save_name] = {}
       # 登録した分のレコード取得
       result = model.where(id: latest_id .. last_id)
-      # 各、結果の代入
+      # 結果の代入
       column_info.each do |e|
         @save[save_name][e["name"]] = result.pluck(e["name"].to_sym)
       end

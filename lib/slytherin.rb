@@ -2,7 +2,6 @@ require 'data_creater.rb'
 require 'parser.rb'
 module Slytherin
   class SetError < StandardError; end
-
 =begin
   Slytherinのrake taskを読み込む用のプログラム
   今後、使う可能性があるのでコメント化
@@ -18,7 +17,6 @@ module Slytherin
 =end
 
   class << self
-    
     # メソッド名: set_function_path
     # 引数: function_path -> メソッドを定義したファイルのpath
     # 動作: メソッドを定義したファイルのpathをインスタンス変数に格納する

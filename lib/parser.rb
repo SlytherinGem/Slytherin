@@ -8,7 +8,7 @@ class Parser
     def parse(yml_path, function_path = nil)
       yml_data = get_yml_data(yml_path)
 
-      function_path = ->(){
+      set_function = ->(){
         # set_function_pathメソッドによるパスの設定
         if function_path.present?
           require function_path

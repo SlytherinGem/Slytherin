@@ -72,7 +72,7 @@ class Parser
       yml_data.map{|m| m[0] } 
     end
 
-    def remove_key_prefix key; key.sub(/.*_/, "") end
+    def remove_key_prefix key; key.sub(KEY_PREFIX, "") end
 
     def check_defined_column yml_data, column_info, key
       # ymlに記載されたカラム名を取得

@@ -1,7 +1,7 @@
 require 'default_seeder.rb'
 require 'slytherin_logger.rb'
 require 'save_data.rb'
-
+require 'regex.rb'
 class DataCreater
   class UnexpectedTypeError < StandardError; end
   class << self
@@ -43,8 +43,8 @@ class DataCreater
       column_info.each do |e|
         e["init_data"] =
         if e["init_data"].kind_of?(Array)
-          e["init_data"].map{|m| m =~ /^\s*<.*>\s*$/ ? eval(m.delete("<>")) : m }
-        elsif e["init_data"] =~ /^\s*<.*>\s*$/
+          e["init_data"].map{|m| m =~ EVAL ? eval(m.delete("<>")) : m }
+        elsif e["init_data"] =~ EVAL
           replace_init_data_expression(e["init_data"].delete("<>"))
         elsif e["init_data"].nil?
           nil
@@ -55,7 +55,7 @@ class DataCreater
     end
 
     def replace_init_data_expression init_data
-      if (init_data =~ /^:[A-Z][A-Za-z0-9]*$/)
+      if (init_data =~ COLON_MODEL)
         eval(init_data.delete(":")).all.pluck(:id)
       else
         save = SaveData.get if defined_save? init_data
@@ -68,7 +68,7 @@ class DataCreater
         defined_loop
       elsif defined_loop.kind_of?(Array)
         defined_loop.length
-      elsif defined_loop =~ /^\s*<.*>\s*$/
+      elsif defined_loop =~ EVAL
         result = replace_loop_expression(defined_loop.delete("<>"))
         get_loop_size(result)
       else
@@ -77,7 +77,7 @@ class DataCreater
     end
 
     def replace_loop_expression expression
-      if (expression =~ /^:[A-Z][A-Za-z0-9]*$/)
+      if (expression =~ COLON_MODEL)
         eval(expression.delete(":")).all.count
       else
         save = SaveData.get if defined_save? expression
@@ -86,7 +86,7 @@ class DataCreater
     end
 
     def defined_save? init_data
-      init_data.gsub(" ", "") =~ /^save\[.*\]\[.*\].*$/
+      init_data.gsub(" ", "") =~ SAVEDATA
     end
 
   end

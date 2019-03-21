@@ -1,3 +1,4 @@
+require 'regex.rb'
 class Parser
   class NotExistsColumn < StandardError; end
   class << self
@@ -67,7 +68,7 @@ class Parser
 
     def get_key_list yml_data
       # $で設定している部分を消去
-      yml_data.delete_if {|key, value| key =~ /\$.*/ }
+      yml_data.delete_if {|key, value| key =~ HEAD_CONFIG}
       yml_data.map{|m| m[0] } 
     end
 

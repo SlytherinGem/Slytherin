@@ -172,5 +172,4 @@ class Slytherin::Test < ActiveSupport::TestCase
       assert_equal(true, Pref.find_by(name: e).present?)
     end
  end
- 
 end

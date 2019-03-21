@@ -7,11 +7,17 @@ class Parser
     def parse(yml_path, function_path = nil)
       yml_data = get_yml_data(yml_path)
 
-      set_function_path = ->(){
-        # set_function_pathによるパスの設定
-        require function_path if function_path.present?
+      function_path = ->(){
+        # set_function_pathメソッドによるパスの設定
+        if function_path.present?
+          require function_path
+          return 
+        end
+
         # yml記載によるパスの設定
-        require yml_data["$function"] if yml_data["$function"].present?
+        if yml_data["$function"].present?
+          require yml_data["$function"]
+        end
       }.call()
           
       # ymlに記述したkey部分を主軸にまわして登録するための情報を一括で作成する

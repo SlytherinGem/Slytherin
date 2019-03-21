@@ -13,21 +13,20 @@ class DataCreater
         SlytherinLogger.print(table["log"]) unless table["log"].nil?
         # モデルの名前からカラム情報を取得
         column_info = table["get_column_info"][table["model"]]
+        # modelデータやメソッドで定義されているinit_dataを配列に変換する
+        convert_init_data_to_arr(column_info)
         # モデル取得
         model = table["model"].constantize
-        # init_dataを配列に変換して更新
-        update_init_data(column_info)
         # ymlのkey取得（エラー発生時に場所を示すため）
         key = table["key"]
-        latest_record = model.last
         # 最新のIDを取得
-        acc_id = latest_id = latest_record.nil? ? 0 : latest_record.id
+        acc_id = latest_id = model.last.nil? ? 0 : model.last.id
         values =
-        get_loop_size(table["loop"]).times.reduce([]) do |values, i|
+        get_loop_size(table["loop"]).times.reduce([]) do |acc, i|
           # init_dataを抽出し登録情報を追加
-          values << column_info.map{|m| 
+          acc.push(column_info.map{|m| 
             m["name"] == "id" ? acc_id += 1 : InitData.make(m, i, key) 
-          }
+          })
         end
         # disabledが設定されているレコードは削除
         # ymlファイルではsliceを0始まりではなく1始まりで設定するので、その分の-1
@@ -35,18 +34,12 @@ class DataCreater
         # 一括で登録
         model.import(column_info.map{|m| m["name"].to_sym }, values, validate: false)
         # saveの指定があれば保存
-        if table["save"].present? 
-          SaveData.save(table["save"], column_info, model, latest_id, acc_id)
-        end
+        SaveData.save(table["save"], column_info, model, latest_id, acc_id) if table["save"].present? 
       end
     end
 
     private
-
-    def update_init_data column_info
-      # 変数saveはymlの定義ファイルで使用されるので
-      # SaveDataから取得しておく
-      save = SaveData.get
+    def convert_init_data_to_arr column_info
       column_info.each do |e|
         e["init_data"] =
         if e["init_data"].kind_of?(Array)
@@ -62,12 +55,10 @@ class DataCreater
     end
 
     def replace_init_data_expression init_data
-      # 変数saveはymlの定義ファイルで使用されるので
-      # SaveDataから取得しておく
-      save = SaveData.get
       if (init_data =~ /^:[A-Z][A-Za-z0-9]*$/)
         eval(init_data.delete(":")).all.pluck(:id)
       else
+        save = SaveData.get if defined_save? init_data
         eval(init_data)
       end
     end
@@ -86,14 +77,16 @@ class DataCreater
     end
 
     def replace_loop_expression expression
-      # 変数saveはymlの定義ファイルで使用されるので
-      # SaveDataから取得しておく
-      save = SaveData.get 
       if (expression =~ /^:[A-Z][A-Za-z0-9]*$/)
         eval(expression.delete(":")).all.count
       else
+        save = SaveData.get if defined_save? expression
         eval(expression)
       end
+    end
+
+    def defined_save? init_data
+      init_data.gsub(" ", "") =~ /^save\[.*\]\[.*\].*$/
     end
 
   end
@@ -102,16 +95,16 @@ end
 class InitData
   class << self
     def make col, i, key
-      data =
+      init_data =
       if col["init_data"].nil?
         DefaultSeeder.get(col["type"])
       else
-        apply_arr_option(col, i)
+        pick_init_data(col, i)
       end
-      apply_contents_option(col, i, data, key)
+      shape_init_data(col, i, init_data, key)
     end
 
-    def apply_arr_option col, i
+    def pick_init_data col, i
       return col["init_data"].sample if col["random"]
       return col["init_data"].first if col["first"]
       return col["init_data"].last if col["last"]
@@ -119,7 +112,7 @@ class InitData
       col["init_data"].rotate(i).first
     end
 
-    def apply_contents_option col, i, data, key
+    def shape_init_data col, i, data, key
       if col["numberling"]
         add_numberling(data, i, key)
       else

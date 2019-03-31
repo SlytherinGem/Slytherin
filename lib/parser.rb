@@ -46,6 +46,7 @@ class Parser
       Module.const_get(model).columns.reduce([]) do |acc, col|
         acc.push({"name" => col.name.to_s,
                   "type" => col.type.to_s,
+                  "use_col_info" => nil,
                   "init_data" => nil,
                   "rotate" => nil,
                   "random" => nil,
@@ -97,6 +98,7 @@ class OptionSetter
       set_option(data, defined_col_info, "last")
       set_option(data, defined_col_info, "numberling")
       set_option(data, defined_col_info, "init_data")
+      set_option(data, defined_col_info, "use_col_info")
       # 不適切なオプションの指定の仕方をしていないか検証
       check_option(data)
       data

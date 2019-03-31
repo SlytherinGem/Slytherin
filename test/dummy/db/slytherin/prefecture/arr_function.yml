@@ -1,0 +1,9 @@
+Mouse:
+  $function: ./test/dummy/db/slytherin/data_set.rb
+  Pref:
+    loop: 47
+    col_info:
+      name:
+        init_data: <set_prefecture>
+      created_at:
+        init_data: [<DateTime.parse('1993-03-1')>, <DateTime.parse('1993-03-2')>]

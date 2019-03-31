@@ -1,0 +1,12 @@
+Mouse:
+  Member:
+    $function: ./test/dummy/db/slytherin/data_set.rb
+    loop: 3
+    col_info:
+      pref_id: 
+        init_data: <:Pref>
+      name: 
+        init_data: ["スズキ", "タナカ", "ヤマダ"]
+      birthday:
+        use_col_info: true
+        init_data: <set_birthday(col["name"])>

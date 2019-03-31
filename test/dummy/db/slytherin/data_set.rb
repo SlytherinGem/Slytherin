@@ -55,3 +55,11 @@ def set_time flg
   return [DateTime.now - 20000.day] if flg == 2
   return [DateTime.now - 30000.day] if flg == 3
 end
+
+def set_birthday name
+  result = {
+    "スズキ" =>  DateTime.parse('1993-02-22'), 
+    "タナカ" =>  DateTime.parse('1993-02-23'), 
+    "ヤマダ" =>  DateTime.parse('1993-02-24')
+  }[name]
+end

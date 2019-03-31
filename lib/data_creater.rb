@@ -14,18 +14,34 @@ class DataCreater
         # モデルの名前からカラム情報を取得
         column_info = table["get_column_info"][table["model"]]
         # modelデータやメソッドで定義されているinit_dataを配列に変換する
-        convert_init_data_to_arr(column_info)
+        convert_init_data_all(column_info)
         # モデル取得
         model = table["model"].constantize
         # ymlのkey取得（エラー発生時に場所を示すため）
         key = table["key"]
         # 最新のIDを取得
         acc_id = latest_id = model.last.nil? ? 0 : model.last.id
+        maked_data = Hash.new
         values =
         get_loop_size(table["loop"]).times.reduce([]) do |acc, i|
           # init_dataを抽出し登録情報を追加
-          acc.push(column_info.map{|m| 
-            m["name"] == "id" ? acc_id += 1 : InitData.make(m, i, key) 
+          acc.push(column_info.map{|m|
+            if m["name"] == "id"
+              maked_data = Hash.new
+              acc_id += 1
+              maked_data[m["name"]] = acc_id
+            elsif m["use_col_info"]
+              # メソッドを一時的に格納
+              tmp = m["init_data"]
+              # init_dataを配列に変換
+              m["init_data"] = convert_init_data(m, maked_data)
+              maked_data[m["name"]] = InitData.make(m, i, key)
+              # 配列情報からメソッドに戻す
+              m["init_data"] = tmp
+            else
+              maked_data[m["name"]] = InitData.make(m, i, key) 
+            end
+            maked_data[m["name"]]
           })
         end
         # disabledが設定されているレコードは削除
@@ -39,27 +55,40 @@ class DataCreater
     end
 
     private
-    def convert_init_data_to_arr column_info
+    def convert_init_data_all column_info
       column_info.each do |e|
         e["init_data"] =
-        if e["init_data"].kind_of?(Array)
-          e["init_data"].map{|m| m =~ EVAL ? eval(m.delete("<>")) : m }
-        elsif e["init_data"] =~ EVAL
-          replace_init_data_expression(e["init_data"].delete("<>"))
-        elsif e["init_data"].nil?
-          nil
+        if e["use_col_info"]
+          # use_col_infoがついているものは、データが作成されてから実行なので
+          # このタイミングで作成できない。そのため、そのまま返却
+          e["init_data"]
         else
-          [e["init_data"]] 
+          convert_init_data(e, nil)
         end
       end
     end
 
-    def replace_init_data_expression init_data
+    def convert_init_data e, maked_data
+      if e["init_data"].kind_of?(Array)
+        e["init_data"].map{|m| m =~ EVAL ? eval(m.delete("<>")) : m }
+      elsif e["init_data"] =~ EVAL
+        replace_init_data_expression(e, maked_data)
+      elsif e["init_data"].nil?
+        nil
+      else
+        [e["init_data"]] 
+      end
+    end
+
+    def replace_init_data_expression e, maked_data
+      init_data = e["init_data"].delete("<>")
       if (init_data =~ COLON_MODEL)
         eval(init_data.delete(":")).all.pluck(:id)
       else
         save = SaveData.get if defined_save? init_data
-        eval(init_data)
+        col = maked_data if maked_data.present?
+        e["init_data"] = eval(init_data)
+        convert_init_data(e, nil)
       end
     end
 

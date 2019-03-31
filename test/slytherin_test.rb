@@ -161,15 +161,51 @@ class Slytherin::Test < ActiveSupport::TestCase
 
   # テスト内容: $functionの実装に関して
   # 期待値: 47都道府県の登録
- test "can careate pref with $function option" do
-  # 都道府県を作成
-  Slytherin.do_seed './test/dummy/db/slytherin/prefecture/$function.yml'
-    # 47レコード生成済み
-    assert_equal(47, Pref.all.count)
-    # 内容が登録されているか確認
-    registerd = set_prefecture
-    registerd.each do |e|
-      assert_equal(true, Pref.find_by(name: e).present?)
+  test "can careate pref with $function option" do
+    # 都道府県を作成
+    Slytherin.do_seed './test/dummy/db/slytherin/prefecture/$function.yml'
+      # 47レコード生成済み
+      assert_equal(47, Pref.all.count)
+      # 内容が登録されているか確認
+      registerd = set_prefecture
+      registerd.each do |e|
+        assert_equal(true, Pref.find_by(name: e).present?)
     end
- end
+  end
+
+  # テスト内容: 配列の中に関数を定義した時の挙動に関して
+  # 期待値: 47都道府県の登録
+  #        1レコード目が1993-02-24
+  #        2レコード目が1993-02-25
+  test "can careate pref with arr in function" do
+    # 都道府県を作成
+    Slytherin.do_seed './test/dummy/db/slytherin/prefecture/arr_function.yml'
+      # 47レコード生成済み
+      assert_equal(47, Pref.all.count)
+      # 内容が登録されているか確認
+      registerd = set_prefecture
+      registerd.each do |e|
+        assert_equal(true, Pref.find_by(name: e).present?)
+      end
+      assert_equal Pref.all[0].created_at, DateTime.parse('1993-03-1')
+      assert_equal Pref.all[1].created_at, DateTime.parse('1993-03-2')
+  end
+
+  # テスト内容: use_col_infoの挙動に関して
+  # 期待値: birthdayが以下のように対応すること 
+  #        スズキ 1993-02-22
+  #        タナカ 1993-02-23
+  #        ヤマダ 1993-02-24
+  test "can careate member with use_col_info option" do
+    # 都道府県を作成
+    Slytherin.do_seed './test/dummy/db/slytherin/prefecture/arr_function.yml'
+    # Member作成
+    Slytherin.do_seed './test/dummy/db/slytherin/member/use_col_info.yml'
+    # Memberは3
+    assert_equal Member.all.count, 3
+    # birthdayは一致する
+    assert_equal Member.find_by(name: "スズキ").birthday, DateTime.parse('1993-02-22')
+    assert_equal Member.find_by(name: "タナカ").birthday, DateTime.parse('1993-02-23')
+    assert_equal Member.find_by(name: "ヤマダ").birthday, DateTime.parse('1993-02-24')
+  end
 end

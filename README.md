@@ -27,7 +27,7 @@ Slytherin.do_seed './db/slytherin/mouse/prefecture.yml'
 
 if you want to more details, get information from Slytherin/test/slytherin_test.rb  
 and understand its' code  
-manual? I don't know!
+
 
 ## Installation
 Add this line to your application's Gemfile:

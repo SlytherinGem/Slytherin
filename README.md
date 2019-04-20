@@ -1,7 +1,8 @@
 # Slytherin
-Slytherinは、ymlファイルを使ったSeederプログラムで誰でも簡単に速いSeedを記述する事ができるGemです。
+Slythern is easy to use seeder which was wriited by ruby language
+You only write a byte yml
+Rails can use Slytherin in seed.rb
 
-## ※現在開発中
 
 ## Installation
 Add this line to your application's Gemfile:

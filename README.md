@@ -25,7 +25,7 @@ seed.rb
 Slytherin.do_seed './db/slytherin/mouse/prefecture.yml'
 ```  
 
-if you want to more details, get information from Slytherin/test/slytherin_test.rb  
+if you want to more details, get information from test/slytherin_test.rb  
 and understand its' code  
 
 

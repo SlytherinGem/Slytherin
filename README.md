@@ -14,7 +14,7 @@ Mouse:
     loop: 10
     col_info:
       name:
-        init_data: [Hokkaido, Aomori]
+        init_data: ["Hokkaido", "Aomori"]
 ```  
 
 following code, as an example for call slytherin in seed.rb 

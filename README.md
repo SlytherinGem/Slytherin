@@ -1,7 +1,7 @@
 # Slytherin
-Slythern is easy to use seeder which was wriited by ruby language
-You only write a byte yml
-Rails can use Slytherin in seed.rb
+Slythern is easy to use seeder which was wriited by ruby language  
+You only write a byte yml file  
+Slytherin can use within seed.rb which Rails has
 
 
 ## Installation

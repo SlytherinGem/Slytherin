@@ -70,6 +70,7 @@ class DataCreater
 
     def convert_init_data e, maked_data
       if e["init_data"].kind_of?(Array)
+        col = maked_data if maked_data.present?
         e["init_data"].map{|m| m =~ EVAL ? eval(m.delete("<>")) : m }
       elsif e["init_data"] =~ EVAL
         replace_init_data_expression(e, maked_data)

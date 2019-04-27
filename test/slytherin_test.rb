@@ -148,13 +148,13 @@ class Slytherin::Test < ActiveSupport::TestCase
                  Pref.all.pluck(:name).sort)
   end
 
-  # テスト内容: saveオプションの実装(id周り)に関して
-  #           idの登録処理だけ少し違う動きをするので上のテストに加えて検証
+  # テスト内容: saveオプションの実装に関して2
+  #           複数の項目でsaveオプションを設定した時の挙動に関してテスト
   # 期待値: PrefレコードのnameとMemberレコードのnameが完全一致
   test "should create pref and member data which use saved id" do
     # 都道府県の名前をsaveしてMemberのレコードを作成
     # loop条件をIDの配列にしている
-    Slytherin.do_seed './test/dummy/db/slytherin/composite/save_id.yml'
+    Slytherin.do_seed './test/dummy/db/slytherin/composite/saves.yml'
     # 個数は同じ
     assert_equal(Pref.all.count, 3)
     assert_equal(Member.all.count, 3)
@@ -162,7 +162,6 @@ class Slytherin::Test < ActiveSupport::TestCase
     assert_equal(Member.all.pluck(:name).sort,
                  Pref.all.pluck(:name).sort)
   end
-
 
   # テスト内容: 同一モデル複数登録の実装に関して
   # 期待値: Memberレコードが200件登録されていること
@@ -224,5 +223,4 @@ class Slytherin::Test < ActiveSupport::TestCase
     assert_equal Member.find_by(name: "タナカ").birthday, DateTime.parse('1993-02-23')
     assert_equal Member.find_by(name: "ヤマダ").birthday, DateTime.parse('1993-02-24')
   end
-
 end

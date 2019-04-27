@@ -6,8 +6,7 @@ class DataCreater
   class UnexpectedTypeError < StandardError; end
   class << self
     def create table_info
-      # saveの初期化
-      SaveData.init
+      SaveData.init()
       table_info.each do |table|
         # log情報が存在すれば出力
         SlytherinLogger.print(table["log"]) unless table["log"].nil?
@@ -49,8 +48,10 @@ class DataCreater
         values.slice!(table["disabled"][0] - 1, table["disabled"][1]) if table["disabled"].present?
         # 一括で登録
         model.import(column_info.map{|m| m["name"].to_sym }, values, validate: false)
+
         # saveの指定があれば保存
-        SaveData.save(table["save"], column_info, model, latest_id, acc_id) if table["save"].present? 
+        # データ作成前の最新のid + 1　から　最新のidまでをsave
+        SaveData.save(table["save"], column_info, model, (latest_id + 1), acc_id) if table["save"].present? 
       end
     end
 

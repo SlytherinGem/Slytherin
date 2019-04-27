@@ -1,0 +1,40 @@
+Mouse:
+  1_Pref:
+    loop: 1
+    col_info:
+      name:
+        init_data: ["北海道"]
+    save: pref
+  1_Member:
+    loop: < save["pref"]["name"] >
+    col_info:
+      name:
+        init_data: < save["pref"]["name"] >
+      pref_id: 
+        init_data: <:Pref>
+  2_Pref:
+    loop: 1
+    col_info:
+      name:
+        init_data: ["青森県"]
+    save: pref
+  2_Member:
+    loop: < save["pref"]["name"] >
+    col_info:
+      name:
+        init_data: < save["pref"]["name"] >
+      pref_id: 
+        init_data: <:Pref>
+  3_Pref:
+    loop: 1
+    col_info:
+      name:
+        init_data: ["岩手県"]
+    save: pref
+  3_Member:
+    loop: < save["pref"]["name"] >
+    col_info:
+      name:
+        init_data: < save["pref"]["name"] >
+      pref_id: 
+        init_data: <:Pref>

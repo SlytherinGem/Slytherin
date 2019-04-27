@@ -126,16 +126,20 @@ end
 class InitData
   class << self
     def make col, i, key
-      init_data =
+      # 指定されていたらnil、改行、長文が自動で入る
+      add_inspection(col) if col["inspection"]
+
+      selected_data =
       if col["init_data"].nil?
         DefaultSeeder.get(col["type"])
       else
-        pick_init_data(col, i)
+        pick_init_data(col, i, key)
       end
-      shape_init_data(col, i, init_data, key)
+
+      shape_init_data(col, i, selected_data, key)
     end
 
-    def pick_init_data col, i
+    def pick_init_data col, i, key
       return col["init_data"].sample if col["random"]
       return col["init_data"].first if col["first"]
       return col["init_data"].last if col["last"]
@@ -143,17 +147,25 @@ class InitData
       col["init_data"].rotate(i).first
     end
 
-    def shape_init_data col, i, data, key
+    def shape_init_data col, i, selected_data, key
       if col["numberling"]
-        add_numberling(data, i, key)
+        add_numberling(selected_data, i, key)
       else
-        data
+        selected_data
       end
     end
 
-    def add_numberling seed_data, i, key
-      if seed_data.kind_of?(String)
-        seed_data += "_#{i}"
+    def add_inspection col
+      if col["init_data"].kind_of?(Array)
+        col["init_data"].push(nil, "改行チェック\n" * 10, "text" * 100)
+      else
+        col["init_data"] = [nil, "改行チェック\n" * 10, "text" * 100]
+      end
+    end
+
+    def add_numberling selected_data, i, key
+      if selected_data.kind_of?(String)
+        selected_data += "_#{i}"
       else
         UnexpectedTypeError.new("#{key}: String型以外で、numberlingオプションは使用不可能です")
       end

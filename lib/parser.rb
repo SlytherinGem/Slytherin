@@ -52,7 +52,8 @@ class Parser
                   "random" => nil,
                   "first" => nil,
                   "last" => nil,
-                  "numberling" => nil})
+                  "numberling" => nil,
+                  "inspection" => nil})
         # 定義されているデータの中にoptionがあれば設定する
         OptionSetter.set(acc.last, defined_data["col_info"][col.name.to_s], key) unless defined_data["col_info"].nil?
         acc
@@ -99,6 +100,7 @@ class OptionSetter
       set_option(data, defined_col_info, "numberling")
       set_option(data, defined_col_info, "init_data")
       set_option(data, defined_col_info, "use_col_info")
+      set_option(data, defined_col_info, "inspection")
       # 不適切なオプションの指定の仕方をしていないか検証
       check_option(data)
       data

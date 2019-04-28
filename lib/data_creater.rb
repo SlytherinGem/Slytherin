@@ -161,25 +161,26 @@ class InitData
 
     def set_inspection col, key
       # カラムの型がstringかtext以外ならエラー
-      unless col["type"] == "string" || col["type"] == "text"
-        UnexpectedTypeError.new("#{key}: String型以外で、inspectionオプションは使用不可能です")
-      end
+      check_column_str_type(col, "inspection")
+
       # nilでinit_dataが設定されていたら代入する
       col["init_data"] = [nil, "改行チェック\n" * 10, "text" * 30] if col["init_data"].nil?
     end
 
     def add_numberling col, selected_data, i, key
       # カラムの型がstringかtext以外ならエラー
-      unless col["type"] == "string" || col["type"] == "text"
-        UnexpectedTypeError.new("#{key}: String型以外で、numberlingオプションは使用不可能です")
-      end
+      check_column_str_type(col, "numberling")
 
       if selected_data.kind_of?(String)
         selected_data += "_#{i}"
       elsif selected_data.nil?
         selected_data = "#{i}"
-      else
-        UnexpectedTypeError.new("#{key}: String型以外で、numberlingオプションは使用不可能です")
+      end
+    end
+
+    def check_column_str_type col, option_name
+      unless col["type"] == "string" || col["type"] == "text"
+        UnexpectedTypeError.new("#{key}: String型以外で、#{option_name}オプションは使用不可能です")
       end
     end
 

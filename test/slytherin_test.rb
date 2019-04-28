@@ -223,4 +223,32 @@ class Slytherin::Test < ActiveSupport::TestCase
     assert_equal Member.find_by(name: "タナカ").birthday, DateTime.parse('1993-02-23')
     assert_equal Member.find_by(name: "ヤマダ").birthday, DateTime.parse('1993-02-24')
   end
+
+  # テスト内容: inspectionの挙動に関して
+  # 期待値: nilテスト用, 改行テスト用, 普通のテキストが各、ymlファイルに従って適切に入るかどうか
+  test "can careate member with inspection option" do
+    Slytherin.do_seed './test/dummy/db/slytherin/prefecture/arr_function.yml'
+    # init_dataなし numberlingなし
+    Slytherin.do_seed './test/dummy/db/slytherin/inspection/base.yml'
+    # Memberは3
+    assert_equal Member.all.count, 3
+    # それぞれに検査用の文字列が入っていることを確認
+    Member.find_by(remarks: nil).present?
+    Member.find_by(remarks: "改行チェック\n" * 10).present?
+    Member.find_by(remarks: "text" * 30).present?
+  end
+
+  # テスト内容: inspectionの挙動に関して2
+  # 期待値: inspectionとnumberlingを同時に使った場合に関して検証
+  test "can careate member with inspection and numberling option" do
+    Slytherin.do_seed './test/dummy/db/slytherin/prefecture/arr_function.yml'
+    # init_dataなし numberlingなし
+    Slytherin.do_seed './test/dummy/db/slytherin/inspection/and_numberling.yml'
+    # Memberは3
+    assert_equal Member.all.count, 3
+    # それぞれに検査用の文字列が入っていることを確認
+    Member.find_by(remarks: "0").present?
+    Member.find_by(remarks: ("改行チェック\n" * 10) + "_1").present?
+    Member.find_by(remarks: ("text" * 30) + "_2").present?
+  end
 end

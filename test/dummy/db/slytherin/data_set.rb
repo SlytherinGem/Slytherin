@@ -57,7 +57,7 @@ def set_time flg
 end
 
 def set_birthday name
-  result = {
+  {
     "スズキ" =>  DateTime.parse('1993-02-22'), 
     "タナカ" =>  DateTime.parse('1993-02-23'), 
     "ヤマダ" =>  DateTime.parse('1993-02-24')

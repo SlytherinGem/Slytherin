@@ -14,6 +14,7 @@ ActiveRecord::Schema.define(version: 20190309065416) do
 
   create_table "members", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name"
+    t.text "remarks"
     t.date "birthday"
     t.bigint "pref_id"
     t.datetime "created_at", null: false

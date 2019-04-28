@@ -3,7 +3,6 @@ require 'slytherin_logger.rb'
 require 'save_data.rb'
 require 'regex.rb'
 class DataCreater
-  class UnexpectedTypeError < StandardError; end
   class << self
     def create table_info
       SaveData.init()
@@ -124,10 +123,10 @@ class DataCreater
 end
 
 class InitData
+  class UnexpectedTypeError < StandardError; end
   class << self
     def make col, i, key
-      # 指定されていたらnil、改行、長文が自動で入る
-      add_inspection(col) if col["inspection"]
+      setting_init_data(col, key)
 
       selected_data =
       if col["init_data"].nil?
@@ -137,6 +136,11 @@ class InitData
       end
 
       shape_init_data(col, i, selected_data, key)
+    end
+
+    def setting_init_data col, key
+      # 指定されていたらnil、改行、長文が自動で入る
+      set_inspection(col, key) if col["inspection"]
     end
 
     def pick_init_data col, i, key
@@ -149,23 +153,31 @@ class InitData
 
     def shape_init_data col, i, selected_data, key
       if col["numberling"]
-        add_numberling(selected_data, i, key)
+        add_numberling(col, selected_data, i, key)
       else
         selected_data
       end
     end
 
-    def add_inspection col
-      if col["init_data"].kind_of?(Array)
-        col["init_data"].push(nil, "改行チェック\n" * 10, "text" * 100)
-      else
-        col["init_data"] = [nil, "改行チェック\n" * 10, "text" * 100]
+    def set_inspection col, key
+      # カラムの型がstringかtext以外ならエラー
+      unless col["type"] == "string" || col["type"] == "text"
+        UnexpectedTypeError.new("#{key}: String型以外で、inspectionオプションは使用不可能です")
       end
+      # nilでinit_dataが設定されていたら代入する
+      col["init_data"] = [nil, "改行チェック\n" * 10, "text" * 30] if col["init_data"].nil?
     end
 
-    def add_numberling selected_data, i, key
+    def add_numberling col, selected_data, i, key
+      # カラムの型がstringかtext以外ならエラー
+      unless col["type"] == "string" || col["type"] == "text"
+        UnexpectedTypeError.new("#{key}: String型以外で、numberlingオプションは使用不可能です")
+      end
+
       if selected_data.kind_of?(String)
         selected_data += "_#{i}"
+      elsif selected_data.nil?
+        selected_data = "#{i}"
       else
         UnexpectedTypeError.new("#{key}: String型以外で、numberlingオプションは使用不可能です")
       end

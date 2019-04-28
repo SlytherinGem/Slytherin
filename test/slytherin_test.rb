@@ -235,7 +235,7 @@ class Slytherin::Test < ActiveSupport::TestCase
     # それぞれに検査用の文字列が入っていることを確認
     Member.find_by(remarks: nil).present?
     Member.find_by(remarks: "改行チェック\n" * 10).present?
-    Member.find_by(remarks: "text" * 30).present?
+    Member.find_by(remarks: "text" * 50).present?
   end
 
   # テスト内容: inspectionの挙動に関して2
@@ -249,6 +249,6 @@ class Slytherin::Test < ActiveSupport::TestCase
     # それぞれに検査用の文字列が入っていることを確認
     Member.find_by(remarks: "0").present?
     Member.find_by(remarks: ("改行チェック\n" * 10) + "_1").present?
-    Member.find_by(remarks: ("text" * 30) + "_2").present?
+    Member.find_by(remarks: ("text" * 50) + "_2").present?
   end
 end

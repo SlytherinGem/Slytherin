@@ -164,7 +164,7 @@ class InitData
       check_column_str_type(col, "inspection")
 
       # nilでinit_dataが設定されていたら代入する
-      col["init_data"] = [nil, "改行チェック\n" * 10, "text" * 30] if col["init_data"].nil?
+      col["init_data"] = [nil, "改行チェック\n" * 10, "text" * 50] if col["init_data"].nil?
     end
 
     def add_numberling col, selected_data, i, key

@@ -43,7 +43,7 @@ class Parser
 
     private
     def get_column_info model, defined_data, key
-      Module.const_get(model).columns.reduce([]) do |acc, col|
+      eval(model).columns.reduce([]) do |acc, col|
         acc.push({"name" => col.name.to_s,
                   "type" => col.type.to_s,
                   "use_col_info" => nil,

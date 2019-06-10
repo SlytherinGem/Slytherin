@@ -84,7 +84,7 @@ class DataCreater
     def replace_init_data_expression e, maked_data
       init_data = e["init_data"].delete("<>")
       if (init_data =~ COLON_MODEL)
-        eval(init_data.delete(":")).all.pluck(:id)
+        eval(init_data.sub(":", "")).all.pluck(:id)
       else
         save = SaveData.get if defined_save? init_data
         col = maked_data if maked_data.present?
@@ -108,7 +108,7 @@ class DataCreater
 
     def replace_loop_expression expression
       if (expression =~ COLON_MODEL)
-        eval(expression.delete(":")).all.count
+        eval(expression.sub(":", "")).all.count
       else
         save = SaveData.get if defined_save? expression
         eval(expression)
